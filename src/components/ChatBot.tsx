@@ -9,10 +9,15 @@ const ChatBot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      createSession();
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+    if (messages.length !== 0) return;
+
+    // Prevent unauthorized calls on initial load when no token exists.
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    createSession();
+  }, [isOpen, messages.length, createSession]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
