@@ -6,6 +6,14 @@ interface ReportSummaryProps {
   onClose: () => void;
 }
 
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
 export default function ReportSummary({ report, onClose }: ReportSummaryProps) {
   const handlePrint = () => {
     window.print();
@@ -61,16 +69,16 @@ export default function ReportSummary({ report, onClose }: ReportSummaryProps) {
                 <div className="space-y-4">
                   <div>
                     <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">Net Worth</p>
-                    <p className="text-2xl font-bold text-white">₹--</p>
+                    <p className="text-2xl font-bold text-white">{formatCurrency(report.netWorth || 0)}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">Assets</p>
-                      <p className="font-semibold text-white text-sm">₹--</p>
+                      <p className="font-semibold text-white text-sm">{formatCurrency(report.totalAssets || 0)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-[#94A3B8] uppercase tracking-wider mb-1">Liabilities</p>
-                      <p className="font-semibold text-rose-400 text-sm">₹--</p>
+                      <p className="font-semibold text-rose-400 text-sm">{formatCurrency(report.totalLiabilities || 0)}</p>
                     </div>
                   </div>
                 </div>
@@ -85,16 +93,16 @@ export default function ReportSummary({ report, onClose }: ReportSummaryProps) {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-[#94A3B8]">Income</span>
-                    <span className="font-bold text-emerald-400">₹--</span>
+                    <span className="font-bold text-emerald-400">{formatCurrency(report.income || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-[#94A3B8]">Expenses</span>
-                    <span className="font-bold text-rose-400">₹--</span>
+                    <span className="font-bold text-rose-400">{formatCurrency(report.expenses || 0)}</span>
                   </div>
                   <div className="h-px bg-white/5 my-2"></div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-bold text-white">Net Savings</span>
-                    <span className="text-xl font-bold text-indigo-400">₹--</span>
+                    <span className="text-xl font-bold text-indigo-400">{formatCurrency(report.savings || 0)}</span>
                   </div>
                 </div>
               </div>

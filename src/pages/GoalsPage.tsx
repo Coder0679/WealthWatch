@@ -4,6 +4,7 @@ import { Plus, Target, TrendingUp, Calendar, Trash2, CheckCircle2 } from 'lucide
 import { useFinancialStore, Goal } from '../store/financialStore';
 import AddGoalModal from '../components/AddGoalModal';
 import AddMoneyModal from '../components/AddMoneyModal';
+import Layout from '../components/Layout';
 
 interface GoalCardProps {
   goal: Goal & { estimatedCompletionDate?: string };
@@ -35,22 +36,22 @@ const GoalCard: React.FC<GoalCardProps> = ({
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-slate-900 border-2 rounded-2xl p-6 transition-shadow hover:shadow-xl relative overflow-hidden ${
-        isCompleted ? 'border-emerald-500/20' : `border-indigo-500/20`
+      className={`bg-[#111827] border rounded-2xl p-6 transition-all hover:shadow-xl relative overflow-hidden ${
+        isCompleted ? 'border-emerald-500/20' : 'border-[#1F2937]'
       }`}
     >
-      <div className="absolute top-0 right-0 p-4">
-        <span className="text-2xl">{theme.emoji}</span>
+      <div className="absolute top-0 right-0 p-4 text-3xl">
+        {theme.emoji}
       </div>
 
       <div className="flex flex-col h-full">
         <div className="mb-4">
-          <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
+          <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
             {goal.title}
             {isCompleted && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
           </h3>
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
                <Calendar className={`w-3.5 h-3.5 ${isOverdue ? 'text-red-500' : ''}`} />
                <span className={isOverdue ? 'text-red-500 font-medium' : ''}>
                  Target: {deadline.toLocaleDateString()}
@@ -70,21 +71,21 @@ const GoalCard: React.FC<GoalCardProps> = ({
         <div className="flex-1 space-y-4">
           <div>
             <div className="flex justify-between items-end mb-2">
-              <span className="text-sm font-medium text-gray-400">Progress</span>
-              <span className={`text-lg font-bold ${isCompleted ? 'text-emerald-400' : `text-indigo-400`}`}>
+              <span className="text-sm font-medium text-[#94A3B8]">Progress</span>
+              <span className={`text-lg font-bold ${isCompleted ? 'text-emerald-400' : 'text-indigo-400'}`}>
                 {progress}%
               </span>
             </div>
-            <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-3 bg-[#0F172A] rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
-                className={`h-full ${isCompleted ? 'bg-emerald-500' : `bg-indigo-500`}`}
+                className={`h-full ${isCompleted ? 'bg-emerald-500' : 'bg-indigo-500'}`}
               />
             </div>
             <div className="flex justify-between mt-2 text-sm">
               <span className="text-white font-medium">₹{goal.currentAmount.toLocaleString()}</span>
-              <span className="text-gray-500">₹{goal.targetAmount.toLocaleString()}</span>
+              <span className="text-[#94A3B8]">₹{goal.targetAmount.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -93,14 +94,14 @@ const GoalCard: React.FC<GoalCardProps> = ({
           {!isCompleted && (
             <button
               onClick={() => onAddMoney(goal)}
-              className={`flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2`}
+              className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" /> Add Money
             </button>
           )}
           <button
             onClick={() => onDelete(goal.id)}
-            className="p-2 rounded-lg border border-slate-700 text-gray-400 hover:text-red-500 hover:border-red-500 transition-colors"
+            className="p-2 rounded-lg border border-[#1F2937] text-[#94A3B8] hover:text-red-500 hover:border-red-500 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -140,95 +141,99 @@ const GoalsPage: React.FC = () => {
   const completedGoals = goals.filter(g => g.status === 'completed');
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Target className="text-indigo-500 w-8 h-8" />
-            Financial Goals
-          </h1>
-          <p className="text-gray-400 mt-1">Plan and save for your future dreams.</p>
-        </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-indigo-600/20"
-        >
-          <Plus className="w-5 h-5" />
-          Create New Goal
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-            <div className="p-3 bg-indigo-500/10 rounded-xl">
-               <TrendingUp className="text-indigo-500 w-6 h-6" />
-            </div>
+    <Layout>
+      <div className="p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-               <p className="text-gray-400 text-sm">Active Goals</p>
-               <p className="text-2xl font-bold text-white">{activeGoals.length}</p>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <Target className="text-indigo-500 w-8 h-8" />
+                Financial Goals
+              </h1>
+              <p className="text-[#94A3B8] mt-1">Plan and save for your future dreams.</p>
             </div>
-         </div>
-         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-            <div className="p-3 bg-emerald-500/10 rounded-xl">
-               <CheckCircle2 className="text-emerald-500 w-6 h-6" />
-            </div>
-            <div>
-               <p className="text-gray-400 text-sm">Completed</p>
-               <p className="text-2xl font-bold text-white">{completedGoals.length}</p>
-            </div>
-         </div>
-      </div>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95 w-full md:w-auto"
+            >
+              <Plus size={20} />
+              <span>Create New Goal</span>
+            </button>
+          </div>
 
-      <div>
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-           Ongoing Goals
-        </h2>
-        {activeGoals.length === 0 ? (
-          <div className="text-center py-20 bg-slate-900 rounded-3xl border border-dashed border-slate-800">
-            <Target className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-            <h3 className="text-xl text-gray-400">No active goals yet</h3>
-            <p className="text-gray-600 mt-2">Start your journey by creating your first goal.</p>
+          {/* Quick Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-[#111827] border border-[#1F2937] p-6 rounded-2xl flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                <TrendingUp size={28} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Active Goals</p>
+                <p className="text-2xl font-bold text-white">{activeGoals.length}</p>
+              </div>
+            </div>
+            <div className="bg-[#111827] border border-[#1F2937] p-6 rounded-2xl flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <CheckCircle2 size={28} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Completed</p>
+                <p className="text-2xl font-bold text-white">{completedGoals.length}</p>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeGoals.map(goal => (
-              <GoalCard 
-                key={goal.id} 
-                goal={goal} 
-                onAddMoney={(g) => { setSelectedGoal(g); setIsMoneyModalOpen(true); }}
-                onDelete={deleteGoal}
-                calculateProgress={calculateProgress}
-                getCategoryTheme={getCategoryTheme}
-              />
-            ))}
-          </div>
-        )}
-      </div>
 
-      {completedGoals.length > 0 && (
-        <div className="pt-8 border-t border-slate-800">
-          <h2 className="text-xl font-bold text-gray-400 mb-6 font-mono tracking-widest uppercase">
-            Achieved Goals
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80">
-            {completedGoals.map(goal => (
-              <GoalCard 
-                key={goal.id} 
-                goal={goal} 
-                isCompleted 
-                onAddMoney={() => {}} 
-                onDelete={deleteGoal}
-                calculateProgress={calculateProgress}
-                getCategoryTheme={getCategoryTheme}
-              />
-            ))}
+          {/* Active Goals */}
+          <div>
+            <h2 className="text-xl font-bold text-white mb-6">Active Goals</h2>
+            {activeGoals.length === 0 ? (
+              <div className="p-12 text-center bg-[#111827] rounded-3xl border border-dashed border-[#1F2937]">
+                <Target className="mx-auto mb-4 text-[#475569]" size={48} />
+                <p className="text-white font-bold mb-1">No active goals yet</p>
+                <p className="text-sm text-[#94A3B8]">Start your journey by creating your first goal ☝️</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activeGoals.map(goal => (
+                  <GoalCard 
+                    key={goal.id} 
+                    goal={goal} 
+                    onAddMoney={(g) => { setSelectedGoal(g); setIsMoneyModalOpen(true); }}
+                    onDelete={deleteGoal}
+                    calculateProgress={calculateProgress}
+                    getCategoryTheme={getCategoryTheme}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Completed Goals */}
+          {completedGoals.length > 0 && (
+            <div className="pt-8 border-t border-[#1F2937]">
+              <h2 className="text-xl font-bold text-white mb-6">Achieved Goals</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80">
+                {completedGoals.map(goal => (
+                  <GoalCard 
+                    key={goal.id} 
+                    goal={goal} 
+                    isCompleted 
+                    onAddMoney={() => {}} 
+                    onDelete={deleteGoal}
+                    calculateProgress={calculateProgress}
+                    getCategoryTheme={getCategoryTheme}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <AddGoalModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
       <AddMoneyModal isOpen={isMoneyModalOpen} onClose={() => setIsMoneyModalOpen(false)} goal={selectedGoal} />
-    </div>
+    </Layout>
   );
 };
 

@@ -4,32 +4,21 @@ import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { useChatStore } from '../store/chatStore';
 
 const ChatBot: React.FC = () => {
-  const { messages, isOpen, isTyping, openChat, closeChat, sendMessage, createSession } = useChatStore();
+  const { messages, isOpen, isTyping, openChat, closeChat, sendMessage } = useChatStore();
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    if (messages.length !== 0) return;
-
-    // Prevent unauthorized calls on initial load when no token exists.
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    createSession();
-  }, [isOpen, messages.length, createSession]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
   const handleSend = () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isTyping) return;
     sendMessage(inputText.trim());
     setInputText('');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleSend();
   };
 
@@ -144,13 +133,13 @@ const ChatBot: React.FC = () => {
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                   placeholder="Ask me anything..."
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-4 pr-12 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 <button 
                   onClick={handleSend}
-                  disabled={!inputText.trim()}
+                  disabled={!inputText.trim() || isTyping}
                   className="absolute right-2 top-2 p-1.5 text-indigo-500 hover:text-indigo-400 disabled:opacity-50 transition-colors"
                 >
                   <Send className="w-5 h-5" />

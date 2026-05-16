@@ -52,7 +52,9 @@ export default function SummaryCard({ title, value, icon, change, changeLabel, v
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
           <div className={`p-4 ${config.iconBg} ${config.iconColor} rounded-2xl shadow-inner`}>
-            {React.cloneElement(icon as React.ReactElement, { size: 28 })}
+            {React.isValidElement(icon)
+              ? React.cloneElement(icon as React.ReactElement<any>, { size: 28 })
+              : icon}
           </div>
           <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
             {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}

@@ -13,12 +13,8 @@ api.interceptors.request.use((config) => {
 });
 
 export const chatService = {
-  createSession: async () => {
-    const response = await api.get('/session');
-    return response.data;
-  },
-  sendMessage: async (message: string, sessionId: string) => {
-    const response = await api.post('/message', { message, sessionId });
+  sendMessage: async (message: string) => {
+    const response = await api.post('/message', { message });
     return response.data;
   },
 };

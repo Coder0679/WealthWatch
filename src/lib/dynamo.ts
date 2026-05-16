@@ -9,6 +9,7 @@ export const TABLES = {
   ASSETS: process.env.AWS_DYNAMODB_TABLE_ASSETS || "WealthWatch_Assets",
   LIABILITIES: process.env.AWS_DYNAMODB_TABLE_LIABILITIES || "WealthWatch_Liabilities",
   GOALS: process.env.AWS_DYNAMODB_TABLE_GOALS || "WealthWatch_Goals",
+  REPORTS: process.env.AWS_DYNAMODB_TABLE_REPORTS || "WealthWatch_Reports",
 };
 
 if (!hasCredentials) {

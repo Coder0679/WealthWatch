@@ -41,7 +41,7 @@ export const getReports = async (req: AuthRequest, res: Response) => {
     if (!isSimulationMode) {
       try {
         const result = await dynamo.send(new ScanCommand({
-          TableName: 'WealthWatch_Reports',
+          TableName: TABLES.REPORTS,
           FilterExpression: "userId = :userId",
           ExpressionAttributeValues: { ":userId": userId }
         }));
@@ -124,7 +124,10 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
     // 3. Generate PDF
     const doc = new PDFDocument({ margin: 50 });
     const stream = new PassThrough();
-    
+
+    // IMPORTANT: pipe doc output into our PassThrough
+    doc.pipe(stream);
+
     // Page 1: Summary
     doc.fontSize(25).text('WealthWatch Monthly Report', { align: 'center' });
     doc.moveDown();
@@ -139,15 +142,17 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
     doc.text(`Monthly Expenses: ₹${expenses.toLocaleString()}`);
     doc.text(`Monthly Savings: ₹${savings.toLocaleString()}`);
     doc.text(`Savings Rate: ${savingsRate}%`);
-    
+
     // Page 2: Transactions
     doc.addPage();
     doc.fontSize(20).text('Recent Transactions', { underline: true });
     doc.moveDown();
     doc.fontSize(10);
-    monthlyTxns.forEach(t => {
+    monthlyTxns.forEach((t: any) => {
       const desc = t.note || t.description || '';
-      doc.text(`${t.date} | ${t.category.padEnd(12)} | ${desc.slice(0, 30).padEnd(32)} | ₹${t.amount}`);
+      const cat = (t.category || '').padEnd(12).slice(0, 12);
+      const safeDesc = String(desc).slice(0, 30).padEnd(32);
+      doc.text(`${t.date} | ${cat} | ${safeDesc} | ₹${t.amount}`);
     });
     doc.moveDown();
     doc.fontSize(12).text(`Total Transactions: ${monthlyTxns.length}`, { align: 'right' });
@@ -156,7 +161,7 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
     doc.addPage();
     doc.fontSize(20).text('Financial Goals Progress', { underline: true });
     doc.moveDown();
-    goals.forEach(g => {
+    goals.forEach((g: any) => {
       const progress = Math.min(100, (Number(g.currentAmount) / Number(g.targetAmount)) * 100).toFixed(1);
       doc.fontSize(14).text(`${g.title}: ${progress}% complete`);
       doc.fontSize(10).text(`Target: ₹${g.targetAmount} | Saved: ₹${g.currentAmount}`);
@@ -173,28 +178,23 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
 
     // 4. Upload to S3
     const fileName = `${userId}/reports/${monthKey}-${Date.now()}.pdf`;
-    const uploadParams = {
-      Bucket: BUCKET_NAME,
-      Key: fileName,
-      Body: stream,
-      ContentType: 'application/pdf'
-    };
 
-    // Need to handle the stream correctly for S3 upload
-    // The @aws-sdk/client-s3 PutObjectCommand doesn't support streams as body easily without Lib-Storage
-    // But for a 2MB PDF, we can collect it into a buffer if needed, or use Upload from lib-storage
-    
-    // For simplicity, let's collect into buffer
-    const chunks: any[] = [];
-    stream.on('data', chunk => chunks.push(chunk));
-    
-    await new Promise((resolve) => stream.on('end', resolve));
-    const buffer = Buffer.concat(chunks);
-    
-    await s3Client.send(new PutObjectCommand({
-      ...uploadParams,
-      Body: buffer
-    }));
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk) => chunks.push(chunk));
+
+    const buffer = await new Promise<Buffer>((resolve, reject) => {
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+      stream.on('error', reject);
+    });
+
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: fileName,
+        Body: buffer,
+        ContentType: 'application/pdf',
+      })
+    );
 
     // 5. Generate Signed URL
     const command = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileName });
@@ -208,24 +208,49 @@ export const generateMonthlyReport = async (req: AuthRequest, res: Response) => 
       monthKey,
       generatedAt: new Date().toISOString(),
       s3Key: fileName,
-      downloadUrl
+      downloadUrl,
+      // Financial metrics for preview/summary
+      netWorth,
+      totalAssets,
+      totalLiabilities,
+      income,
+      expenses,
+      savings,
+      savingsRate: Number(savingsRate)
     };
+
+    let metadataSaved = false;
+    let metadataError: string | null = null;
 
     if (!isSimulationMode) {
       try {
         await dynamo.send(new PutCommand({
-          TableName: 'WealthWatch_Reports',
+          TableName: TABLES.REPORTS,
           Item: reportData
         }));
-      } catch (e) {
-        console.warn('Could not save report metadata to DynamoDB (table missing?)');
+        metadataSaved = true;
+      } catch (e: any) {
+        metadataSaved = false;
+        metadataError = e?.message || String(e);
+        console.warn(
+          `Could not save report metadata to DynamoDB (table=${TABLES.REPORTS}). Error: ${metadataError}`
+        );
       }
     } else {
       (store as any).reports = (store as any).reports || [];
       (store as any).reports.push(reportData);
+      metadataSaved = true;
     }
 
-    res.json({ message: 'Report generated successfully', report: reportData });
+    res.json({
+      message: metadataSaved ? 'Report generated successfully' : 'Report generated successfully, but metadata save failed',
+      report: reportData,
+      metadata: {
+        saved: metadataSaved,
+        table: TABLES.REPORTS,
+        error: metadataError
+      }
+    });
 
   } catch (error: any) {
     console.error('Report Generation Error:', error);

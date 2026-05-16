@@ -2,7 +2,6 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
-import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import authRoutes from "./server/routes/auth.routes.js";
 import dashboardRoutes from "./server/routes/dashboard.routes.js";
@@ -14,12 +13,11 @@ import goalRoutes from "./server/routes/goal.routes.js";
 import chatRoutes from "./server/routes/chat.routes.js";
 import reportRoutes from "./server/routes/report.routes.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 async function startServer() {
   const app = express();
   const PORT = process.env.PORT || 3000;
+  const HOST = process.env.HOST || "0.0.0.0";
+
 
   app.use(cors());
   app.use(express.json());
@@ -55,9 +53,13 @@ async function startServer() {
     });
   }
 
-  app.listen(Number(PORT), "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  app.listen(Number(PORT), HOST, () => {
+    const localhostUrl = `http://localhost:${PORT}`;
+    const lanUrl = HOST === "0.0.0.0" ? `http://<YOUR_LAN_IP>:${PORT}` : `http://${HOST}:${PORT}`;
+    console.log(`Server running on ${localhostUrl}`);
+    console.log(`Network URL: ${lanUrl}`);
   });
+
 }
 
 startServer();

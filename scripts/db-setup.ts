@@ -15,6 +15,7 @@ const TABLES = {
   ASSETS: process.env.AWS_DYNAMODB_TABLE_ASSETS || "WealthWatch_Assets",
   LIABILITIES: process.env.AWS_DYNAMODB_TABLE_LIABILITIES || "WealthWatch_Liabilities",
   GOALS: process.env.AWS_DYNAMODB_TABLE_GOALS || "WealthWatch_Goals",
+  REPORTS: process.env.AWS_DYNAMODB_TABLE_REPORTS || "WealthWatch_Reports",
 };
 
 async function tableExists(name: string) {
@@ -73,6 +74,7 @@ async function init() {
   await createTable(TABLES.ASSETS, "userId", "assetId");
   await createTable(TABLES.LIABILITIES, "userId", "liabilityId");
   await createTable(TABLES.GOALS, "userId", "goalId");
+  await createTable(TABLES.REPORTS, "userId", "reportId");
 
   console.log("✨ Database initialization complete!");
 }

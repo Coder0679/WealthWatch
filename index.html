@@ -8,6 +8,90 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.watsonAssistantChatOptions = {
+        integrationID: "99668461-60f7-4476-b00b-51a20067f562",
+        region: "au-syd",
+        serviceInstanceID: "b5f021fa-25e1-40c7-9862-02e9ac9cd7b2",
+        onLoad: async function(instance) {
+          let pendingGroqReply = null;
+
+          function getMessageText(event) {
+            return (
+              event?.data?.input?.text ||
+              event?.message?.input?.text ||
+              event?.message?.message?.content ||
+              ""
+            );
+          }
+
+          function getFallbackReply() {
+            return "Sorry, WealthWatch AI is unavailable right now. Please try again.";
+          }
+
+          async function askGroq(message) {
+            const response = await fetch("/api/chat/message", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+              },
+              body: JSON.stringify({ message })
+            });
+
+            if (!response.ok) {
+              return getFallbackReply();
+            }
+
+            const data = await response.json();
+            return data.reply || getFallbackReply();
+          }
+
+          instance.on({
+            type: "pre:send",
+            handler: function(event) {
+              const userMessage = getMessageText(event).trim();
+
+              // Let Watson handle the empty welcome request so the official greeting still appears.
+              if (!userMessage) return;
+
+              pendingGroqReply = askGroq(userMessage).catch(getFallbackReply);
+            }
+          });
+
+          instance.on({
+            type: "pre:receive",
+            handler: async function(event) {
+              if (!pendingGroqReply) return;
+
+              const reply = await pendingGroqReply;
+              pendingGroqReply = null;
+
+              if (event.data?.output) {
+                event.data.output.generic = [{
+                  response_type: "text",
+                  text: reply
+                }];
+              }
+
+              if (event.message?.content) {
+                event.message.content = [{
+                  type: "text",
+                  text: reply
+                }];
+              }
+            }
+          });
+
+          await instance.render();
+        }
+      };
+
+      setTimeout(function() {
+        const t = document.createElement("script");
+        t.src = "https://web-chat.global.assistant.watson.appdomain.cloud/versions/latest/WatsonAssistantChatEntry.js";
+        document.head.appendChild(t);
+      }, 0);
+    </script>
   </body>
 </html>
-

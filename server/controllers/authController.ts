@@ -3,7 +3,7 @@ import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import jwt from 'jsonwebtoken';
 import { dynamo, TABLES, isSimulationMode } from '../../src/lib/dynamo.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'wealthwatch-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'wealthwatch-premium-secret-2026';
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;

@@ -1,108 +1,115 @@
 import { Response } from "express";
-import AssistantV2 from 'ibm-watson/assistant/v2.js';
-import { IamAuthenticator } from 'ibm-watson/auth/index.js';
+import Groq from "groq-sdk";
+import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamo, TABLES, isSimulationMode } from "../../src/lib/dynamo.js";
-import { ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { store } from "../simulationStore.js";
 import { AuthRequest } from "../middleware/authMiddleware.js";
 
-const fullUrl = process.env.IBM_WATSON_ASSISTANT_SERVICE_URL || 'https://api.au-syd.assistant.watson.cloud.ibm.com';
-const assistantId = process.env.IBM_WATSON_ASSISTANT_ID || '';
-
-const assistant = new AssistantV2({
-  version: '2021-06-14',
-  authenticator: new IamAuthenticator({
-    apikey: process.env.IBM_WATSON_ASSISTANT_APIKEY || '',
-  }),
-  serviceUrl: fullUrl,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY || "",
 });
 
-export const createSession = async (req: AuthRequest, res: Response) => {
-  try {
-    if (!assistantId) {
-      console.error('IBM_WATSON_ASSISTANT_ID is missing');
-      return res.status(500).json({ message: 'Watson Assistant ID not configured' });
-    }
-    
-    // Newer V2 Assistant API often requires environmentId to be 'draft' or 'live' 
-    // unless a specific environment UUID is provided.
-    const session = await assistant.createSession({
-      assistantId: assistantId,
-    } as any);
-    res.json({ sessionId: session.result.session_id });
-  } catch (error: any) {
-    console.error('Watson Session Error Detail:', error);
-    res.status(500).json({ message: 'Failed to create chat session', error: error.message });
+type FinancialItem = Record<string, any>;
+
+async function getItemsForUser(tableName: string, userId: string): Promise<FinancialItem[]> {
+  const result = await dynamo.send(
+    new QueryCommand({
+      TableName: tableName,
+      KeyConditionExpression: "userId = :userId",
+      ExpressionAttributeValues: { ":userId": userId },
+    })
+  );
+
+  return result.Items || [];
+}
+
+async function getFinancialData(userId: string) {
+  if (isSimulationMode) {
+    return {
+      transactions: store.transactions.filter((item) => item.userId === userId),
+      assets: store.assets.filter((item) => item.userId === userId),
+      liabilities: store.liabilities.filter((item) => item.userId === userId),
+      goals: store.goals.filter((item) => item.userId === userId),
+    };
   }
-};
+
+  const [transactions, assets, liabilities, goals] = await Promise.all([
+    getItemsForUser(TABLES.TRANSACTIONS, userId),
+    getItemsForUser(TABLES.ASSETS, userId),
+    getItemsForUser(TABLES.LIABILITIES, userId),
+    getItemsForUser(TABLES.GOALS, userId),
+  ]);
+
+  return { transactions, assets, liabilities, goals };
+}
+
+const toAmount = (value: unknown) => Number(value || 0);
 
 export const sendMessage = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.userId;
-  const { message, sessionId } = req.body;
+  const { message } = req.body;
 
-  if (!userId) return res.status(401).json({ message: 'Unauthorized' });
-  if (!sessionId) return res.status(400).json({ message: 'Missing sessionId' });
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
+  if (!message || typeof message !== "string") {
+    return res.status(400).json({ message: "Missing message" });
+  }
+
+  if (!process.env.GROQ_API_KEY) {
+    return res.status(503).json({ message: "Groq API key not configured" });
+  }
 
   try {
-    let assets = [];
-    let liabilities = [];
-    let transactions = [];
-    let goals = [];
+    const { transactions, assets, liabilities, goals } = await getFinancialData(userId);
 
-    if (!isSimulationMode) {
-      const [assetsRes, liabsRes, txnsRes, goalsRes] = await Promise.all([
-        dynamo.send(new ScanCommand({ TableName: TABLES.ASSETS, FilterExpression: "userId = :u", ExpressionAttributeValues: { ":u": userId } })),
-        dynamo.send(new ScanCommand({ TableName: TABLES.LIABILITIES, FilterExpression: "userId = :u", ExpressionAttributeValues: { ":u": userId } })),
-        dynamo.send(new ScanCommand({ TableName: TABLES.TRANSACTIONS, FilterExpression: "userId = :u", ExpressionAttributeValues: { ":u": userId } })),
-        dynamo.send(new ScanCommand({ TableName: TABLES.GOALS, FilterExpression: "userId = :u", ExpressionAttributeValues: { ":u": userId } })),
-      ]);
-      assets = assetsRes.Items || [];
-      liabilities = liabsRes.Items || [];
-      transactions = txnsRes.Items || [];
-      goals = goalsRes.Items || [];
-    }
-
-    const totalAssets = assets.reduce((sum: number, a: any) => sum + Number(a.currentValue || 0), 0);
-    const totalLiabilities = liabilities.reduce((sum: number, l: any) => sum + Number(l.balance || l.remainingAmount || 0), 0);
+    const totalAssets = assets.reduce((sum, asset) => sum + toAmount(asset.currentValue), 0);
+    const totalLiabilities = liabilities.reduce(
+      (sum, liability) => sum + toAmount(liability.balance ?? liability.remainingAmount),
+      0
+    );
     const netWorth = totalAssets - totalLiabilities;
-    
-    const expenses = transactions.filter((t: any) => t.type === 'expense');
-    const totalExpenses = expenses.reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
-    const totalIncome = transactions.filter((t: any) => t.type === 'income').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
-    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
+    const monthlyIncome = transactions
+      .filter((transaction) => transaction.type === "income")
+      .reduce((sum, transaction) => sum + toAmount(transaction.amount), 0);
+    const monthlyExpense = transactions
+      .filter((transaction) => transaction.type === "expense")
+      .reduce((sum, transaction) => sum + toAmount(transaction.amount), 0);
+    const activeGoals = goals.filter((goal) => goal.status !== "completed");
 
-    const financialContext = {
-      user_name: req.user?.name || 'User',
-      financial_data: {
-        totalAssets,
-        totalLiabilities,
-        netWorth,
-        totalIncome,
-        totalExpenses,
-        savingsRate: `${savingsRate.toFixed(1)}%`,
-        goalsCount: goals.length,
-        activeGoals: goals.filter((g: any) => g.status === 'active').map((g: any) => g.title),
-      }
-    };
+    const groqResponse = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: `You are WealthWatch AI Assistant for Indian users.
 
-    const response = await assistant.message({
-      assistantId,
-      sessionId,
-      input: {
-        message_type: 'text',
-        text: message,
-      },
-      context: {
-        skills: {
-          'main skill': {
-            user_defined: financialContext
-          }
-        }
-      }
-    } as any);
+User Financial Data:
+Net Worth: ₹${netWorth}
+Monthly Income: ₹${monthlyIncome}
+Monthly Expenses: ₹${monthlyExpense}
+Total Assets: ₹${totalAssets}
+Total Liabilities: ₹${totalLiabilities}
+Active Goals: ${activeGoals.length}
 
-    res.json(response.result);
+Answer questions about their finances specifically.
+Also answer general Indian finance questions.
+Be friendly and use simple English.
+Always use ₹ INR format.
+Keep responses concise (max 3-4 lines).`,
+        },
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+      max_tokens: 300,
+    });
+
+    const reply = groqResponse.choices[0]?.message?.content?.trim();
+    return res.json({
+      reply: reply || "I couldn't generate a response right now. Please try again.",
+    });
   } catch (error: any) {
-    console.error('Watson Message Error Detail:', error);
-    res.status(500).json({ message: 'Failed to send message', error: error.message });
+    console.error("Groq Chat Error:", error);
+    return res.status(502).json({ message: "Failed to generate chat response" });
   }
 };
