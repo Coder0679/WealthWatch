@@ -13,6 +13,7 @@ import SettingsPage from './pages/SettingsPage';
 import LiabilitiesPage from './pages/LiabilitiesPage';
 import AIAdvisorPage from './pages/AIAdvisorPage';
 import LandingPage from './pages/LandingPage';
+import PricingPage from './pages/PricingPage';
 
 export default function App() {
   const { initialize } = useAuthStore();
@@ -26,6 +27,7 @@ export default function App() {
       <div className="min-h-screen bg-[#0F172A] text-white">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           

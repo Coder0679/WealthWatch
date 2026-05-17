@@ -64,7 +64,7 @@ const AddGoalModal: React.FC<Props> = ({ isOpen, onClose }) => {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1">Category</label>
             <select
@@ -89,7 +89,7 @@ const AddGoalModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1">Target Amount (₹)</label>
             <input

@@ -35,15 +35,15 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <div className="p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="p-4 md:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
           {/* Top Section */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-white mb-1">Financial Command Center</h1>
-              <p className="text-[#94A3B8]">Your wealth performance at a glance</p>
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">Financial Command Center</h1>
+              <p className="text-sm sm:text-base text-[#94A3B8]">Your wealth performance at a glance</p>
             </div>
-            <div className="flex items-center gap-2 bg-[#111827] border border-[#1F2937] p-1 rounded-xl">
+            <div className="grid grid-cols-2 items-center gap-2 bg-[#111827] border border-[#1F2937] p-1 rounded-xl w-full sm:w-auto">
                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium shadow-lg shadow-indigo-500/20">Summary</button>
                <button className="px-4 py-2 text-[#94A3B8] hover:text-white rounded-lg text-sm font-medium transition-colors">Detailed</button>
             </div>
@@ -86,11 +86,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 bg-[#111827] p-8 rounded-3xl border border-[#1F2937] hover:border-indigo-500/20 transition-colors group">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-1">Net Worth Progression</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            <div className="lg:col-span-8 bg-[#111827] p-5 sm:p-8 rounded-3xl border border-[#1F2937] hover:border-indigo-500/20 transition-colors group overflow-hidden">
+              <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+                <div className="min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Net Worth Progression</h3>
                   <p className="text-sm text-[#94A3B8]">Growth trajectory over the last 6 months</p>
                 </div>
                 <div className="h-10 w-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
@@ -100,21 +100,21 @@ export default function DashboardPage() {
               {charts && <NetWorthChart data={charts.netWorthHistory} />}
             </div>
 
-            <div className="lg:col-span-4 bg-[#111827] p-8 rounded-3xl border border-[#1F2937] hover:border-emerald-500/20 transition-colors">
-              <h3 className="text-xl font-bold text-white mb-1">Asset Allocation</h3>
-              <p className="text-sm text-[#94A3B8] mb-8">Current portfolio distribution</p>
+            <div className="lg:col-span-4 bg-[#111827] p-5 sm:p-8 rounded-3xl border border-[#1F2937] hover:border-emerald-500/20 transition-colors overflow-hidden">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Asset Allocation</h3>
+              <p className="text-sm text-[#94A3B8] mb-6 sm:mb-8">Current portfolio distribution</p>
               {charts && <AssetAllocationChart data={charts.assetAllocation} />}
             </div>
 
-            <div className="lg:col-span-6 bg-[#111827] p-8 rounded-3xl border border-[#1F2937] hover:border-blue-500/20 transition-colors">
-               <h3 className="text-xl font-bold text-white mb-1">Income vs Expense</h3>
-               <p className="text-sm text-[#94A3B8] mb-8">Monthly cashflow analysis</p>
+            <div className="lg:col-span-6 bg-[#111827] p-5 sm:p-8 rounded-3xl border border-[#1F2937] hover:border-blue-500/20 transition-colors overflow-hidden">
+               <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Income vs Expense</h3>
+               <p className="text-sm text-[#94A3B8] mb-6 sm:mb-8">Monthly cashflow analysis</p>
               {charts && <IncomeExpenseChart data={charts.incomeVsExpense} />}
             </div>
 
-            <div className="lg:col-span-6 bg-[#111827] p-8 rounded-3xl border border-[#1F2937] hover:border-purple-500/20 transition-colors">
-              <h3 className="text-xl font-bold text-white mb-1">Spending Categories</h3>
-              <p className="text-sm text-[#94A3B8] mb-8">Top expense areas this month</p>
+            <div className="lg:col-span-6 bg-[#111827] p-5 sm:p-8 rounded-3xl border border-[#1F2937] hover:border-purple-500/20 transition-colors overflow-hidden">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-1">Spending Categories</h3>
+              <p className="text-sm text-[#94A3B8] mb-6 sm:mb-8">Top expense areas this month</p>
               {charts && <SpendingChart data={charts.spendingByCategory} />}
             </div>
           </div>

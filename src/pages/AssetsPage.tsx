@@ -45,13 +45,13 @@ export default function AssetsPage() {
 
   return (
     <Layout>
-      <div className="p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="p-4 md:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div>
               <p className="text-[#94A3B8] font-bold uppercase tracking-widest text-xs mb-2">Total Combined Value</p>
-              <h1 className="text-5xl font-black tracking-tight text-white">{formatCurrency(totalValue)}</h1>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white break-words">{formatCurrency(totalValue)}</h1>
             </div>
             <button 
               onClick={() => setIsModalOpen(true)}
@@ -90,7 +90,7 @@ export default function AssetsPage() {
                 <div key={asset.id} className="bg-[#111827] border border-[#1F2937] p-6 rounded-3xl hover:border-indigo-500/30 transition-all group relative overflow-hidden">
                   <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-600/10 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity`}></div>
                   
-                  <div className="flex justify-between items-start mb-6 relative z-10">
+                  <div className="flex justify-between items-start gap-3 mb-6 relative z-10">
                     <div className="h-12 w-12 rounded-2xl bg-[#0A0F1E] border border-[#1F2937] flex items-center justify-center text-white p-2.5">
                       {TYPE_ICONS[asset.type] || <TrendingUp />}
                     </div>
@@ -112,7 +112,7 @@ export default function AssetsPage() {
                       {asset.type.replace('_', ' ')}
                     </p>
 
-                    <div className="mt-8 pt-6 border-t border-[#1F2937] grid grid-cols-2 gap-4">
+                    <div className="mt-8 pt-6 border-t border-[#1F2937] grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <p className="text-[10px] font-bold text-[#94A3B8] uppercase mb-1">Current Value</p>
                         <p className="text-lg font-black text-white">{formatCurrency(asset.currentValue)}</p>

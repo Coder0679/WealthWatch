@@ -58,7 +58,7 @@ export default function AddLiabilityModal({ isOpen, onClose }: Props) {
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-bold text-[#94A3B8] uppercase ml-1">Type</label>
             <select
@@ -81,7 +81,7 @@ export default function AddLiabilityModal({ isOpen, onClose }: Props) {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-bold text-[#94A3B8] uppercase ml-1">Total Loan Amount</label>
             <input

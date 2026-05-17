@@ -12,7 +12,9 @@ import {
   User,
   Bell,
   CreditCard,
-  Sparkles
+  Sparkles,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -23,6 +25,7 @@ export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -43,8 +46,19 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
   ];
 
+  const quickNavItems = navItems.slice(0, 5);
+
   return (
     <div className="flex min-h-screen bg-[#0A0F1E] text-white">
+      {mobileNavOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation overlay"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileNavOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside className="w-64 border-r border-[#1F2937] bg-[#111827] hidden lg:flex flex-col sticky top-0 h-screen">
         <div className="p-6">
@@ -88,13 +102,83 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </aside>
 
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-[86vw] max-w-xs border-r border-[#1F2937] bg-[#111827] lg:hidden transition-transform duration-300 ${
+          mobileNavOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between border-b border-[#1F2937] p-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span className="font-bold text-xl">W</span>
+              </div>
+              <div>
+                <p className="font-bold text-lg tracking-tight">WealthWatch</p>
+                <p className="text-xs text-[#94A3B8]">{profileName}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(false)}
+              className="p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#1F2937]"
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <nav className="flex-1 space-y-2 overflow-y-auto p-4">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileNavOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                      : 'text-[#94A3B8] hover:bg-[#1F2937] hover:text-white'
+                  }`
+                }
+              >
+                <span>{item.icon}</span>
+                <span className="font-medium">{item.name}</span>
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="border-t border-[#1F2937] p-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full px-4 py-3 text-[#94A3B8] hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all"
+            >
+              <LogOut size={20} />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
-        <header className="h-20 border-b border-[#1F2937] bg-[#111827]/50 backdrop-blur-md sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between">
-          <div className="lg:hidden flex items-center gap-3">
-             <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+        <header className="min-h-20 border-b border-[#1F2937] bg-[#111827]/50 backdrop-blur-md sticky top-0 z-30 px-4 md:px-8 py-4 flex items-center justify-between gap-3">
+          <div className="lg:hidden flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(true)}
+              className="p-2 rounded-xl border border-[#1F2937] text-[#94A3B8] hover:text-white hover:bg-[#1F2937]"
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
               <span className="font-bold text-lg">W</span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold truncate">{profileName}</p>
+              <p className="text-[11px] text-[#94A3B8] truncate">{profileRisk} Profile</p>
             </div>
           </div>
           
@@ -103,7 +187,7 @@ export default function Layout({ children }: LayoutProps) {
              <p className="text-lg font-bold">{user?.name || 'Investor'}</p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               className="p-2 text-[#94A3B8] hover:text-white hover:bg-[#1F2937] rounded-lg transition-colors relative"
               aria-label="Notifications"
@@ -113,7 +197,7 @@ export default function Layout({ children }: LayoutProps) {
               <span className="absolute top-2 right-2 h-2 w-2 bg-indigo-500 rounded-full border-2 border-[#111827]"></span>
             </button>
 
-            <div className="flex items-center gap-3 pl-4 border-l border-[#1F2937] relative">
+            <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-[#1F2937] relative">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold">{profileName}</p>
                 <p className="text-xs text-[#94A3B8] capitalize">{profileRisk} Profile</p>
@@ -129,7 +213,7 @@ export default function Layout({ children }: LayoutProps) {
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 top-12 w-64 bg-[#111827] border border-[#1F2937] rounded-2xl shadow-2xl shadow-black/30 overflow-hidden z-50">
+                <div className="absolute right-0 top-12 w-64 max-w-[calc(100vw-2rem)] bg-[#111827] border border-[#1F2937] rounded-2xl shadow-2xl shadow-black/30 overflow-hidden z-50">
                   <div className="p-4 border-b border-[#1F2937]">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-indigo-600/20 border border-indigo-500/20 flex items-center justify-center">
@@ -171,9 +255,28 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto bg-[#0A0F1E] custom-scrollbar">
+        <main className="flex-1 overflow-auto bg-[#0A0F1E] custom-scrollbar pb-24 lg:pb-0">
           {children}
         </main>
+
+        <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#1F2937] bg-[#111827]/95 px-2 py-2 backdrop-blur-md lg:hidden">
+          <div className="flex items-center justify-between gap-1">
+            {quickNavItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-medium transition-colors ${
+                    isActive ? 'bg-indigo-600/15 text-white' : 'text-[#94A3B8]'
+                  }`
+                }
+              >
+                {item.icon}
+                <span className="truncate">{item.name}</span>
+              </NavLink>
+            ))}
+          </div>
+        </nav>
       </div>
     </div>
   );

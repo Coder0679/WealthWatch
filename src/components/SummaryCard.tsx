@@ -46,17 +46,17 @@ export default function SummaryCard({ title, value, icon, change, changeLabel, v
   const config = variants[variant];
   
   return (
-    <div className={`relative overflow-hidden bg-[#111827] p-6 rounded-2xl border ${config.border} ${config.glow} transition-transform hover:scale-[1.02] duration-300`}>
+    <div className={`relative overflow-hidden bg-[#111827] p-5 sm:p-6 rounded-2xl border ${config.border} ${config.glow} transition-transform hover:scale-[1.02] duration-300`}>
       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${config.gradient} blur-3xl -mr-16 -mt-16 opacity-50`}></div>
       
       <div className="relative z-10">
-        <div className="flex justify-between items-start mb-6">
-          <div className={`p-4 ${config.iconBg} ${config.iconColor} rounded-2xl shadow-inner`}>
+        <div className="flex justify-between items-start gap-3 mb-5 sm:mb-6">
+          <div className={`p-3 sm:p-4 ${config.iconBg} ${config.iconColor} rounded-2xl shadow-inner shrink-0`}>
             {React.isValidElement(icon)
               ? React.cloneElement(icon as React.ReactElement<any>, { size: 28 })
               : icon}
           </div>
-          <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs sm:text-sm font-bold ${isPositive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
             {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
             {Math.abs(change)}%
           </div>
@@ -64,8 +64,8 @@ export default function SummaryCard({ title, value, icon, change, changeLabel, v
         
         <div>
           <h3 className="text-[#94A3B8] font-medium text-sm mb-1 uppercase tracking-wider">{title}</h3>
-          <p className="text-3xl font-bold text-white tracking-tight">{value}</p>
-          <div className="flex items-center gap-2 mt-4 text-xs font-medium text-[#94A3B8]">
+          <p className="text-2xl sm:text-3xl font-bold text-white tracking-tight break-words">{value}</p>
+          <div className="flex items-start gap-2 mt-4 text-xs font-medium text-[#94A3B8]">
              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
              {changeLabel}
           </div>

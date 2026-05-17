@@ -56,12 +56,12 @@ export default function TransactionsPage() {
 
   return (
     <Layout>
-      <div className="p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="p-4 md:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Transactions</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">Transactions</h1>
               <p className="text-[#94A3B8]">Track and manage your daily cashflow</p>
             </div>
             <button 
@@ -106,7 +106,7 @@ export default function TransactionsPage() {
 
           {/* Filters */}
           <div className="bg-[#111827] border border-[#1F2937] p-4 rounded-2xl mb-6 flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[200px] relative">
+            <div className="w-full md:flex-1 md:min-w-[200px] relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" size={18} />
               <input 
                 type="text" 
@@ -115,7 +115,7 @@ export default function TransactionsPage() {
               />
             </div>
             <select 
-              className="bg-[#0A0F1E] border border-[#1F2937] rounded-xl px-4 py-2 text-sm text-white"
+              className="w-full sm:w-auto bg-[#0A0F1E] border border-[#1F2937] rounded-xl px-4 py-2 text-sm text-white"
               onChange={(e) => setFilter({ ...filter, type: e.target.value })}
             >
               <option value="">All Types</option>
@@ -123,7 +123,7 @@ export default function TransactionsPage() {
               <option value="expense">Expense</option>
             </select>
             <select 
-              className="bg-[#0A0F1E] border border-[#1F2937] rounded-xl px-4 py-2 text-sm text-white"
+              className="w-full sm:w-auto bg-[#0A0F1E] border border-[#1F2937] rounded-xl px-4 py-2 text-sm text-white"
               onChange={(e) => setFilter({ ...filter, category: e.target.value })}
             >
               <option value="">All Categories</option>
@@ -136,7 +136,55 @@ export default function TransactionsPage() {
 
           {/* List */}
           <div className="bg-[#111827] border border-[#1F2937] rounded-2xl overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="block md:hidden divide-y divide-[#1F2937]">
+              {transactions.map((txn) => (
+                <div key={txn.id} className="p-4 space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-[#0A0F1E] flex items-center justify-center p-2 shrink-0">
+                        {CATEGORY_ICONS[txn.category] || CATEGORY_ICONS['Other']}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-white truncate">{txn.note || txn.category}</p>
+                        <p className="text-xs text-[#94A3B8]">{txn.type === 'income' ? 'Cash In' : 'Cash Out'}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if(confirm('Are you sure you want to delete this transaction?')) {
+                          deleteTransaction(txn.id);
+                        }
+                      }}
+                      className="p-2 text-[#94A3B8] hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all shrink-0"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="px-3 py-1 rounded-full bg-[#0A0F1E] border border-[#1F2937] text-[10px] font-bold text-[#94A3B8] uppercase tracking-widest">
+                      {txn.category}
+                    </span>
+                    <p className={`text-sm font-bold ${txn.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {txn.type === 'income' ? '+' : '-'}{formatCurrency(txn.amount)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
+                    <Calendar size={14} />
+                    {new Date(txn.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </div>
+                </div>
+              ))}
+
+              {transactions.length === 0 && (
+                <div className="px-6 py-12 text-center text-[#94A3B8]">
+                  No transactions found matching your filters.
+                </div>
+              )}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#1F2937]/50">

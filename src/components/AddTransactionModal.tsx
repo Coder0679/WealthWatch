@@ -49,7 +49,7 @@ export default function AddTransactionModal({ isOpen, onClose }: Props) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add Transaction">
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-2 gap-4 bg-[#0A0F1E] p-1 rounded-2xl border border-[#1F2937]">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 bg-[#0A0F1E] p-1 rounded-2xl border border-[#1F2937]">
           <button
             type="button"
             onClick={() => setFormData({ ...formData, type: 'income', category: 'Salary' })}
@@ -79,7 +79,7 @@ export default function AddTransactionModal({ isOpen, onClose }: Props) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-[#94A3B8] uppercase ml-1">Category</label>
               <select
