@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAIStore } from '../store/aiStore';
 import { useDashboardStore } from '../store/dashboardStore';
@@ -6,10 +6,12 @@ import { useFinancialStore } from '../store/financialStore';
 import HealthScoreCard from '../components/HealthScoreCard';
 import InsightCard from '../components/InsightCard';
 import { Sparkles, Loader2, RefreshCw, MessageSquareQuote } from 'lucide-react';
-import { motion } from 'motion/react';
+import MonthlyNarrativeTts from '../components/MonthlyNarrativeTts';
+
 
 export default function AIAdvisorPage() {
-  const { insights, healthScore, monthlySummary, isLoading, fetchInsights, fetchSummary, calculateHealthScore } = useAIStore();
+  const { insights, healthScore, monthlySummary, isLoading, fetchInsights, fetchSummary, fetchMonthlyNarrativeTts, calculateHealthScore } = useAIStore();
+
   const { summary, fetchSummary: fetchDashboardSummary } = useDashboardStore();
   const { fetchAssets, fetchLiabilities } = useFinancialStore();
 
@@ -68,7 +70,14 @@ export default function AIAdvisorPage() {
                     Click refresh to generate your personal monthly summary.
                   </p>
                 )}
+
+                {/* TTS Controls */}
+                <MonthlyNarrativeTts
+                  summaryText={monthlySummary}
+                  fetchTts={fetchMonthlyNarrativeTts}
+                />
               </div>
+
             </div>
 
             {/* Right: Insights */}

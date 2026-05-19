@@ -11,8 +11,10 @@ interface AIState {
   lastUpdated: string | null;
   fetchInsights: () => Promise<void>;
   fetchSummary: () => Promise<void>;
+  fetchMonthlyNarrativeTts: () => Promise<{ summary: string; audioBase64: string; audioMime: string }>;
   calculateHealthScore: () => void;
 }
+
 
 export const useAIStore = create<AIState>((set, get) => ({
   insights: null,
@@ -42,6 +44,14 @@ export const useAIStore = create<AIState>((set, get) => ({
       set({ monthlySummary: data.summary });
     } catch {}
   },
+
+  fetchMonthlyNarrativeTts: async () => {
+    const data = await aiService.getMonthlyNarrativeTts();
+    // Keep UI in sync if backend returns an updated summary
+    if (data?.summary) set({ monthlySummary: data.summary });
+    return data;
+  },
+
 
   calculateHealthScore: () => {
     const dashboardStore = useDashboardStore.getState();

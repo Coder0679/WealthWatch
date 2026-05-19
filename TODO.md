@@ -1,12 +1,11 @@
-# TODO
+# TODO - WealthWatch QA Playwright Autonomous Exploration
 
-## Network-hosted dev setup (npm run dev)
-- [ ] Ensure Express + Vite dev server are reachable from local network: bind to 0.0.0.0 and expose a clear URL.
-- [ ] Add/confirm environment variables: `PORT` and optional `HOST`.
-- [x] Update `server.ts` to use `HOST` env var (default `0.0.0.0`) and update logs.
-- [x] (If needed) ensure any Vite server settings (`host`, `strictPort`) are configured for HMR and network access.
-
-- [ ] Provide exact command to run (Windows CMD): `set HOST=0.0.0.0 && set PORT=3000 && npm run dev`
-- [ ] Verify by checking reachable URLs from another device using: `http://<YOUR_LAN_IP>:3000`
-
-
+- [ ] Add Playwright helper utilities (logging console/network failures, safe navigation/crawl helpers, auth helpers, modal helpers)
+- [ ] Add main headed autonomous exploration spec: tests/wealthwatch.qa.spec.ts
+- [ ] Ensure selectors use role/label/text where possible; verify routing after clicks
+- [ ] Validate public routes (/ , /pricing , /login , /signup)
+- [ ] Validate protected routes after login (/dashboard , /transactions , /assets , /liabilities , /ai-advisor , /goals , /reports , /settings)
+- [ ] Exercise UI: sidebar/mobile menu, profile dropdown, notifications button, filters/search, and modal open/close flows (add forms)
+- [ ] Detect console errors and failed API requests; attach screenshots on failure
+- [ ] Run tests locally in headed mode (chromium) and verify artifacts (HTML report, traces on retry, screenshots on failure)
+- [ ] Update REPORT.md if needed / capture final QA findings from test output

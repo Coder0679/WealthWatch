@@ -1,12 +1,9 @@
 import { Router } from 'express';
-import { getInsights, getMonthlySummary } from '../controllers/aiController.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 import { getMonthlyNarrativeAudio } from '../controllers/ttsController.js';
 
 const router = Router();
 
-router.post('/insights', authenticateToken, getInsights);
-router.get('/monthly-summary', authenticateToken, getMonthlySummary);
 router.post('/monthly-narrative-tts', authenticateToken, getMonthlyNarrativeAudio);
 
 export default router;

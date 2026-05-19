@@ -19,5 +19,9 @@ export const aiService = {
   getMonthlySummary: async (): Promise<{ summary: string }> => {
     const response = await axios.get(`${API_URL}/monthly-summary`, getAuthHeader());
     return response.data;
+  },
+  getMonthlyNarrativeTts: async (): Promise<{ summary: string; audioBase64: string; audioMime: string }> => {
+    const response = await axios.post(`${API_URL}/monthly-narrative-tts`, {}, getAuthHeader());
+    return response.data;
   }
 };
