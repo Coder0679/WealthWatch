@@ -1,10 +1,13 @@
 import { Router } from 'express';
-import { signup, login, logout } from '../controllers/authController.js';
+import { signup, login, logout, getAppIDAuthUrl, handleAppIDCallback } from '../controllers/authController.js';
 
 const router = Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
 router.post('/logout', logout);
+
+router.get('/appid/auth-url', getAppIDAuthUrl);
+router.get('/appid/callback', handleAppIDCallback);
 
 export default router;

@@ -23,7 +23,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const navigate = useNavigate();
-  const { login, isLoading, error } = useAuthStore();
+  const { login, loginWithToken, isLoading, error } = useAuthStore();
 
   const handleAppIDLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -51,9 +51,8 @@ export default function LoginPage() {
       const handleMessage = async (event: MessageEvent) => {
         if (!event.origin.endsWith('.run.app') && !event.origin.includes('localhost')) return;
         
-        if (event.data?.type === 'AUTH_SUCCESS' && event.data?.token) {
-          // fallback to regular login method using token if store does not expose loginWithToken
-          await login(event.data.token, event.data.token);
+        if (event.data?.type === 'AUTH_SUCCESS' && event.data?.token && event.data?.user) {
+          loginWithToken(event.data.token, event.data.user);
           window.removeEventListener('message', handleMessage);
           navigate('/dashboard');
         }

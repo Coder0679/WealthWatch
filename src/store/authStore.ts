@@ -9,6 +9,7 @@ interface AuthState {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
+  loginWithToken: (token: string, user: User) => void;
   logout: () => void;
   initialize: () => void;
 }
@@ -52,6 +53,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ error: err.response?.data?.message || 'Signup failed', isLoading: false });
       throw err;
     }
+  },
+
+  loginWithToken: (token, user) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    set({ user, token, isAuthenticated: true });
   },
 
   logout: () => {
